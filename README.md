@@ -43,4 +43,10 @@ Schemaänderungen durch Migrationen, Datenänderungen durch Adminaktionen. Die D
 
 ## Gestaltung und Herkunft
 
-Nutzerlogo: Element 1.svg, bereits mit „Gebraut in Struthütten“. Initiales Biermotiv: KI-generierte Illustration, keine Aufnahme des tatsächlichen Bieres. Der Gurgelrutscher basiert auf dem Rezept von horstibus (Maische, Malz und mehr, 05.02.2013); Beschreibung und Braudaten sind für diesen Sud aufbereitet.
+Nutzerlogo: Element 1.png, bereits mit „Gebraut in Struthütten“. Initiales Biermotiv: KI-generierte Illustration, keine Aufnahme des tatsächlichen Bieres. Der Gurgelrutscher basiert auf dem Rezept von horstibus (Maische, Malz und mehr, 05.02.2013); Beschreibung und Braudaten sind für diesen Sud aufbereitet.
+
+## Importauswahl und Löschen
+
+Die Importvorschau bietet eine Checkbox pro Sud sowie Alle auswählen/abwählen. Nicht gebraute Entwürfe werden standardmäßig nicht ausgewählt. Abgewählte interne Sud-IDs werden dauerhaft in beer_import_exclusions gespeichert und können später wieder ausgewählt werden. Abwählen löscht bestehende Sude nicht.
+
+Im Etikett-Editor kann ein Sud nach Eingabe von LÖSCHEN endgültig aus der Website entfernt werden. Er bleibt bei Folgeimports abgewählt. Die originale SQLite und hochgeladene Bilddateien werden nicht gelöscht.

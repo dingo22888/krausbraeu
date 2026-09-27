@@ -8,9 +8,33 @@ import { requireAdmin, COOKIE } from '@/lib/auth';
 import { database } from '@/lib/db';
 import { parseSqlite } from '@/lib/import-sqlite';
 import type { Brew } from '@/lib/types';
+import { partitionSelection } from '@/lib/import-selection';
 export async function logout(){(await cookies()).delete(COOKIE);redirect('/admin');}
 export async function stageImport(form:FormData){await requireAdmin();const file=form.get('database');if(!(file instanceof File)||file.size===0||file.size>3*1024*1024)redirect('/admin?error=file');let rows:Brew[];try{rows=await parseSqlite(Buffer.from(await file.arrayBuffer()));}catch{redirect('/admin?error=sqlite');}const sql=database();const id=randomUUID();await sql`DELETE FROM beer_import_batches WHERE created_at < now()-interval '1 day'`;await sql`INSERT INTO beer_import_batches(id,payload) VALUES(${id},${JSON.stringify(rows)}::jsonb)`;redirect(`/admin/import/${id}`);}
-export async function confirmImport(form:FormData){await requireAdmin();const id=String(form.get('batch')||'');if(!/^[a-f\d-]{36}$/.test(id))redirect('/admin?error=batch');const sql=database();const rows=await sql`SELECT payload FROM beer_import_batches WHERE id=${id}::uuid AND created_at>now()-interval '1 day'`;if(!rows[0])redirect('/admin?error=batch');const brews=rows[0].payload as Brew[];await sql.transaction([...brews.map(b=>sql`INSERT INTO beer_entries(source_id,brew) VALUES(${b.sourceId},${JSON.stringify(b)}::jsonb) ON CONFLICT(source_id) DO UPDATE SET brew=EXCLUDED.brew,updated_at=now()`),sql`DELETE FROM beer_import_batches WHERE id=${id}::uuid`]);revalidatePath('/','layout');redirect('/admin?success=import');}
+export async function confirmImport(form:FormData) {
+ await requireAdmin();const id=String(form.get('batch')||'');if(!/^[a-f\d-]{36}$/.test(id))redirect('/admin?error=batch');
+ const sql=database();const rows=await sql`SELECT payload FROM beer_import_batches WHERE id=${id}::uuid AND created_at>now()-interval '1 day'`;
+ if(!rows[0])redirect('/admin?error=batch');const brews=rows[0].payload as Brew[];
+ let selection: ReturnType<typeof partitionSelection>;
+ try {selection=partitionSelection(brews,form.getAll('source_id'));}catch{redirect(`/admin/import/${id}?error=selection`);}
+ await sql.transaction([
+  ...selection.selected.map(b=>sql`INSERT INTO beer_entries(source_id,brew) VALUES(${b.sourceId},${JSON.stringify(b)}::jsonb) ON CONFLICT(source_id) DO UPDATE SET brew=EXCLUDED.brew,updated_at=now()`),
+  ...selection.selected.map(b=>sql`DELETE FROM beer_import_exclusions WHERE source_id=${b.sourceId}`),
+  ...selection.skipped.map(b=>sql`INSERT INTO beer_import_exclusions(source_id) VALUES(${b.sourceId}) ON CONFLICT DO NOTHING`),
+  sql`DELETE FROM beer_import_batches WHERE id=${id}::uuid`
+ ]);
+ revalidatePath('/','layout');redirect('/admin?success=import');
+}
+export async function deleteBeer(form:FormData) {
+ await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');
+ if(form.get('confirmation')!=='LÖSCHEN')redirect(`/admin/beer/${id}?error=confirmation`);
+ const sql=database();
+ await sql.transaction([
+  sql`INSERT INTO beer_import_exclusions(source_id) SELECT source_id FROM beer_entries WHERE id=${id} ON CONFLICT DO NOTHING`,
+  sql`DELETE FROM beer_entries WHERE id=${id}`
+ ]);
+ revalidatePath('/','layout');redirect('/admin?success=deleted');
+}
 export async function saveBeer(form:FormData){await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');const returnTo=`/admin/beer/${id}`;const title=String(form.get('display_name')||'').trim().slice(0,120);const description=String(form.get('description')||'').trim().slice(0,4000);const tasting=String(form.get('tasting_notes')||'').trim().slice(0,4000);const color=String(form.get('accent')||'');const published=form.get('published')==='on';const rawNumber=String(form.get('public_number')||'');const number=rawNumber===''?null:Number(rawNumber);if(!/^#[\da-f]{6}$/i.test(color)||(number!==null&&(!Number.isSafeInteger(number)||number<=0||number>99999999))||(published&&number===null))redirect(returnTo+'?error=validation');
  const sql=database();const previous=await sql`SELECT image_url,public_number FROM beer_entries WHERE id=${id}`;if(!previous[0])redirect('/admin');let imageUrl=previous[0].image_url as string;
  const file=form.get('artwork');if(file instanceof File&&file.size>0){if(!process.env.BLOB_READ_WRITE_TOKEN)redirect(returnTo+'?error=storage');if(file.size>3*1024*1024)redirect(returnTo+'?error=image');const data=Buffer.from(await file.arrayBuffer());const png=data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));const jpg=data[0]===255&&data[1]===216&&data[2]===255;const webp=data.subarray(0,4).toString()==='RIFF'&&data.subarray(8,12).toString()==='WEBP';if(!png&&!jpg&&!webp)redirect(returnTo+'?error=image');const ext=png?'png':jpg?'jpg':'webp';const blob=await put(`beer/${id}/artwork.${ext}`,data,{access:'public',addRandomSuffix:true,contentType:png?'image/png':jpg?'image/jpeg':'image/webp'});imageUrl=blob.url;}

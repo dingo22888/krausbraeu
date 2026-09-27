@@ -11,7 +11,7 @@ Next.js App Router application, Node 24, Neon Postgres. This project does NOT us
 - Keep migrations additive, versioned, and transactional. Review and test before applying.
 - npm test, npm run typecheck, npm run build. Build applies additive migrations only when a Neon connection is present.
 - LOCAL_PREVIEW=1 works only in local development; it uses the real, sanitized Sud 31 fixture for visual checks.
-- User logo: public/krausbraeu-logo.svg already says Gebraut in Struthütten. Do not use the older Salchendorf logo.
+- User logo: public/krausbraeu-logo.png already says Gebraut in Struthütten. Do not use the older Salchendorf logo.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -22,3 +22,5 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+- Import selections use source_id, never Sudnummer. Unchecked IDs are remembered in beer_import_exclusions. Deletion excludes the source ID before removing the website record.
