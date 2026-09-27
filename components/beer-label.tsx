@@ -5,8 +5,9 @@ import type { Beer } from '@/lib/types';
 export const format=(n:number|null,digits=1)=>n===null?'—':new Intl.NumberFormat('de-DE',{maximumFractionDigits:digits}).format(n);
 export function dateLabel(date:string|null) {return date?new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'}).format(new Date(date.slice(0,10)+'T12:00:00Z')):'Noch nicht gebraut';}
 export function statusLabel(beer:Beer) { return beer.brew.bottledDate?'Abgefüllt':beer.brew.date?'In Gärung':'Rezeptentwurf'; }
-export function BeerLabel({beer,preview=false}:{beer:Beer;preview?:boolean}) { const b=beer.brew; const name=beer.display_name||b.name; const hops=[...new Set(b.hops.map(h=>h.name))];
- return <article className="label-page" style={{'--accent':beer.accent} as CSSProperties}>
+export function BeerLabel({beer,preview=false}:{beer:Beer;preview?:boolean}) { const b=beer.brew; const name=beer.display_name||b.name; const hops=[...new Set(b.hops.map(h=>h.name))]; const accent=/^#[0-9a-f]{6}$/i.test(beer.accent)?beer.accent:'#e9b44c';
+ return <article className="label-page" style={{'--accent':accent} as CSSProperties}>
+ <style>{`:root { --accent: ${accent}; }`}</style>
  {preview&&<div className="notice">Private Vorschau · <Link href={`/admin/beer/${beer.id}`}>Zurück zur Bearbeitung</Link></div>}
  <section className="hero"><div className="hero-copy"><div className="eyebrow">HANDGEBRAUT · SUD {String(beer.public_number??b.number).padStart(2,'0')}</div><p className="style-name">{b.style||'Hausgebraut'}</p><h1>{name}</h1><p className="hero-description">{beer.description||'Ein selbst gebrautes Bier von KrausBräu. Kleine Menge, eigener Charakter.'}</p><div className="hero-foot"><span className="pill">{statusLabel(beer)}</span><span>Gebraut am {dateLabel(b.date)}</span></div><a className="text-link" href="#bier">Das steckt drin <span aria-hidden="true">↓</span></a></div>
  <div className="hero-art">{beer.image_url?<Image src={beer.image_url} alt={`Illustration zum Bier ${name}`} fill sizes="(max-width: 760px) 100vw, 50vw" priority unoptimized={beer.image_url.startsWith('https:')} />:<div className="type-art" aria-label={`Sud ${b.number}`}>#{b.number}</div>}<div className="art-stamp"><span>KRAUSBRÄU</span><b>#{String(beer.public_number??b.number).padStart(2,'0')}</b><span>KLEINER SUD. EIGENER CHARAKTER.</span></div></div></section>

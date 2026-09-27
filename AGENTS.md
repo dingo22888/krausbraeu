@@ -24,3 +24,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 <!-- END:nextjs-agent-rules -->
 
 - Import selections use source_id, never Sudnummer. Unchecked IDs are remembered in beer_import_exclusions. Deletion excludes the source ID before removing the website record.
+- Bulk publication must be atomic, preserve assigned URLs, and reject missing/duplicate/conflicting numbers without partial updates.
+- Editorial migration version 3 only fills existing records; never changes publication status or imports Kevin. Preserve existing custom descriptions, images and non-default accents.

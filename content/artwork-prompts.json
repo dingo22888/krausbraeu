@@ -1,0 +1,54 @@
+{
+  "method": "Built-in image_gen",
+  "direction": "Original rock/metal album-inspired digital beer covers. Square, etched painterly texture, cinematic chiaroscuro, no text, band logos or copied album compositions.",
+  "motifs": [
+    {
+      "name": "copperhead",
+      "scene": "A coiled sculptural copper serpent rising from dark hammered copper brewing metal, oxidized teal patina and molten copper veins, elegant and mysterious, burnt orange highlights."
+    },
+    {
+      "name": "mells-hells",
+      "scene": "A luminous golden sun split by an elegant dark wing silhouette above barley fields, subtle ember sparks, warm honey gold and pale ivory against charcoal, power and warmth, not literal hell."
+    },
+    {
+      "name": "queen",
+      "scene": "An empty ornate violet crystal crown suspended inside an ancient glass bell jar, thin crack releasing purple light into black fog, poised regal solitude, amethyst and silver."
+    },
+    {
+      "name": "ai-ipa",
+      "scene": "A sculptural hop cone built of emerald circuit boards and botanical leaves, intricate roots turning into luminous circuitry, acid lime and forest green, organic intelligence, mysterious dark laboratory."
+    },
+    {
+      "name": "maple",
+      "scene": "A single giant bronze maple leaf floating over a midnight forest lake, amber sap like molten lines within the leaf, mist and rust red highlights, majestic autumn atmosphere."
+    },
+    {
+      "name": "ghost",
+      "scene": "Two ghostly lion silhouettes made of smoke stepping through a nocturnal forest, one silver mist and the other black shadow edged with violet light, haunting elegant original rock album cover."
+    },
+    {
+      "name": "wheat",
+      "scene": "A monumental intertwined wheat stalk and ancient river dragon sculpted in pale gold, rising over a misty river valley, delicate blue light, medieval engraving meets painted rock sleeve."
+    },
+    {
+      "name": "bock",
+      "scene": "A majestic horned mountain goat made of dark stone and copper veins on a mountain ridge in a storm, ruby and amber highlights, monumental and restrained."
+    },
+    {
+      "name": "origins",
+      "scene": "An ancient anvil holding a glowing amber seed, rings of engraved barley on iron, golden sparks in charcoal smoke, craft and beginnings, warm amber highlights."
+    },
+    {
+      "name": "marzen",
+      "scene": "An ancient oak tree with copper-gold leaves above a subterranean glowing amber brewing cellar, late autumn dusk, elegant detailed painting, bronze highlights."
+    },
+    {
+      "name": "dubbel",
+      "scene": "Two luminous arched abbey windows reflected in a dark chalice-shaped pool, ancient stone, burgundy and crimson stained glass glow, solemn painterly dusk."
+    },
+    {
+      "name": "bright",
+      "scene": "A radiant pale golden river cutting through jagged slate mountains under a turquoise dawn, subtle barley shapes in carved rock, luminous and optimistic yet dramatic."
+    }
+  ]
+}

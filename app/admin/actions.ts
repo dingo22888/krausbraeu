@@ -8,6 +8,7 @@ import { requireAdmin, COOKIE } from '@/lib/auth';
 import { database } from '@/lib/db';
 import { parseSqlite } from '@/lib/import-sqlite';
 import type { Brew } from '@/lib/types';
+import { publicationIds } from '@/lib/publication';
 import { partitionSelection } from '@/lib/import-selection';
 export async function logout(){(await cookies()).delete(COOKIE);redirect('/admin');}
 export async function stageImport(form:FormData){await requireAdmin();const file=form.get('database');if(!(file instanceof File)||file.size===0||file.size>3*1024*1024)redirect('/admin?error=file');let rows:Brew[];try{rows=await parseSqlite(Buffer.from(await file.arrayBuffer()));}catch{redirect('/admin?error=sqlite');}const sql=database();const id=randomUUID();await sql`DELETE FROM beer_import_batches WHERE created_at < now()-interval '1 day'`;await sql`INSERT INTO beer_import_batches(id,payload) VALUES(${id},${JSON.stringify(rows)}::jsonb)`;redirect(`/admin/import/${id}`);}
@@ -41,3 +42,34 @@ export async function saveBeer(form:FormData){await requireAdmin();const id=Numb
  // Preserve an already assigned public URL. Reimported source numbers never rename it.
  if(previous[0].public_number!==null&&previous[0].public_number!==number)redirect(returnTo+'?error=number');
  try{await sql`UPDATE beer_entries SET display_name=${title},description=${description},tasting_notes=${tasting},accent=${color},public_number=${number},published=${published},image_url=${imageUrl},updated_at=now() WHERE id=${id}`;}catch(error){if((error as {code?:string}).code==='23505')redirect(returnTo+'?error=duplicate');throw error;}revalidatePath('/','layout');redirect(returnTo+'?success=saved');}
+
+export async function bulkPublication(form:FormData) {
+ await requireAdmin();
+ const operation=form.get('operation');
+ if(operation!=='publish'&&operation!=='unpublish')redirect('/admin?error=selection');
+ let ids:number[];
+ try{ids=publicationIds(form.getAll('beer_id'));}catch{redirect('/admin?error=selection');}
+ const sql=database();const publishing=operation==='publish';
+ let changed;
+ try {
+  changed=await sql`
+   WITH selected AS MATERIALIZED (
+    SELECT id, COALESCE(public_number, CASE WHEN brew->>'number' ~ '^[1-9][0-9]{0,7}$' THEN (brew->>'number')::integer END) AS target
+    FROM beer_entries WHERE id=ANY(${ids}::integer[])
+   ), valid AS (
+    SELECT (SELECT count(*) FROM selected)=${ids.length}
+     AND (NOT ${publishing} OR (
+      NOT EXISTS (SELECT 1 FROM selected WHERE target IS NULL)
+      AND NOT EXISTS (SELECT target FROM selected GROUP BY target HAVING count(*)>1)
+      AND NOT EXISTS (SELECT 1 FROM beer_entries e JOIN selected s ON e.public_number=s.target WHERE e.id<>s.id)
+     )) AS ok
+   )
+   UPDATE beer_entries e SET published=${publishing},
+    public_number=CASE WHEN ${publishing} THEN s.target ELSE e.public_number END,
+    updated_at=now()
+   FROM selected s,valid v WHERE e.id=s.id AND v.ok RETURNING e.id
+  `;
+ }catch(error){if((error as {code?:string}).code==='23505')redirect('/admin?error=publication');throw error;}
+ if(changed.length!==ids.length)redirect('/admin?error=publication');
+ revalidatePath('/','layout');redirect(`/admin?success=${publishing?'published':'private'}&count=${changed.length}`);
+}

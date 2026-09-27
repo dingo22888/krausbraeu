@@ -50,3 +50,11 @@ Nutzerlogo: Element 1.png, bereits mit „Gebraut in Struthütten“. Initiales 
 Die Importvorschau bietet eine Checkbox pro Sud sowie Alle auswählen/abwählen. Nicht gebraute Entwürfe werden standardmäßig nicht ausgewählt. Abgewählte interne Sud-IDs werden dauerhaft in beer_import_exclusions gespeichert und können später wieder ausgewählt werden. Abwählen löscht bestehende Sude nicht.
 
 Im Etikett-Editor kann ein Sud nach Eingabe von LÖSCHEN endgültig aus der Website entfernt werden. Er bleibt bei Folgeimports abgewählt. Die originale SQLite und hochgeladene Bilddateien werden nicht gelöscht.
+
+## Mehrfach-Veröffentlichung & Cover-Serie
+
+In `/admin` Sude auswählen (alle, nur private oder einzeln) und gemeinsam veröffentlichen bzw. auf privat setzen. Die Aktion prüft Adminrechte und führt eine atomare Datenbankänderung aus. Neue öffentliche Nummern stammen aus der Sudnummer; bestehende bleiben unverändert. Fehlende oder doppelte Nummern verhindern die gesamte Veröffentlichung.
+
+`content/beer-editorial.json` enthält 31 redaktionelle Kurztexte, Farben und die Zuordnung der Cover-Serie. Die einmalige Datenmigration (Version 3 in `scripts/migrate.mjs`) ergänzt ausschließlich bestehende Sude, lässt Veröffentlichungen unverändert und bewahrt vorhandene Texte/Bilder sowie vom Standard abweichende Farben. Kevin ist nicht enthalten. Keine Verkostungsnotizen werden erfunden. Die zwölf neuen Cover werden von zusammengehörigen Rezepten gemeinsam genutzt; Gurgelrutscher behält sein bestehendes Motiv. Bildgenerierung mit dem eingebauten ImageGen; Motive unter `content/artwork-prompts.json`, optimierte WebP-Dateien unter `public/artworks/`.
+
+Die Akzentfarbe der dargestellten Bierseite gilt serverseitig auch für Header, Footer, Fokus- und Hoverzustände. Das Schwarz-Weiß-Logo bleibt unverändert.
