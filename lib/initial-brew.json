@@ -1,0 +1,65 @@
+{
+  "sourceId": 37,
+  "number": 31,
+  "name": "Gurgelrutscher",
+  "style": "Helles (OG)",
+  "date": "2026-09-26T20:03:21",
+  "bottledDate": null,
+  "status": 1,
+  "originalGravity": 15.5,
+  "plannedGravity": 13.8,
+  "ibu": 25.0,
+  "ebc": 9.946153846153846,
+  "volume": 21.0,
+  "abv": null,
+  "malts": [
+    {
+      "name": "Pale Ale Malz",
+      "amount": 3.6782041546776076,
+      "share": 76.92307692307693
+    },
+    {
+      "name": "Weizenmalz hell",
+      "amount": 0.551730623201641,
+      "share": 11.538461538461538
+    },
+    {
+      "name": "Carapils",
+      "amount": 0.45977551933470096,
+      "share": 9.615384615384617
+    },
+    {
+      "name": "Haferflocken",
+      "amount": 0.0919551038669402,
+      "share": 1.9230769230769236
+    }
+  ],
+  "hops": [
+    {
+      "name": "Hallertauer Magnum",
+      "amount": 5.142764926023071
+    },
+    {
+      "name": "Hallertauer Magnum",
+      "amount": 5.142764926023071
+    },
+    {
+      "name": "Hallertauer Magnum",
+      "amount": 5.142764926023071
+    },
+    {
+      "name": "Hallertauer Magnum",
+      "amount": 25.0
+    }
+  ],
+  "yeast": [
+    "Danstar Nottingham Ale"
+  ],
+  "fermentation": [
+    {
+      "date": "2026-09-26T20:03:21",
+      "extract": 15.5,
+      "temperature": 18.0
+    }
+  ]
+}

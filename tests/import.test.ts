@@ -1,0 +1,9 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { DatabaseSync } from 'node:sqlite';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { parseSqlite } from '../lib/import-sqlite.ts';
+test('Importer separates source IDs and duplicate sud numbers; hides unfinished ABV and private comments',async()=>{const dir=await mkdtemp(join(tmpdir(),'beer-test-'));try{const path=join(dir,'fixture.sqlite');const db=new DatabaseSync(path);db.exec(`CREATE TABLE Sud(ID INTEGER,Sudnummer INTEGER,Sudname TEXT,Status INTEGER,Braudatum TEXT,Abfuelldatum TEXT,erg_Alkohol REAL,Kommentar TEXT);CREATE TABLE Malzschuettung(SudID INTEGER,Name TEXT,erg_Menge REAL,Prozent REAL);CREATE TABLE Hopfengaben(SudID INTEGER,Name TEXT,erg_Menge REAL);CREATE TABLE Hefegaben(SudID INTEGER,Name TEXT);CREATE TABLE Hauptgaerverlauf(SudID INTEGER,Zeitstempel TEXT,Restextrakt REAL,Temp REAL);INSERT INTO Sud VALUES(37,31,'Gurgelrutscher',1,'2026-09-26',NULL,0.45,'PRIVATE NOTE');INSERT INTO Sud VALUES(38,31,'Entwurf',0,NULL,NULL,5,'PRIVATE NOTE');INSERT INTO Sud VALUES(39,32,'Fertig',2,'2026-08-01','2026-08-15',5.2,'PRIVATE NOTE');INSERT INTO Malzschuettung VALUES(37,'Pale Ale',4,100);`);db.close();const result=await parseSqlite(await readFile(path));assert.equal(result.length,3);assert.equal(result[0].sourceId,37);assert.equal(result[0].number,31);assert.equal(result[1].number,31);assert.equal(result[0].abv,null);assert.equal(result[2].abv,5.2);assert.equal(result[0].malts[0].name,'Pale Ale');assert.ok(!JSON.stringify(result).includes('PRIVATE NOTE'));}finally{await rm(dir,{recursive:true,force:true});}});
+test('Importer rejects non SQLite and oversized files',async()=>{await assert.rejects(()=>parseSqlite(Buffer.from('not sqlite')));await assert.rejects(()=>parseSqlite(Buffer.alloc(11*1024*1024)));});

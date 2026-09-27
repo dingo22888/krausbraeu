@@ -1,0 +1,3 @@
+export type Ingredient = { name: string; amount: number; share?: number };
+export type Brew = { sourceId: number; number: number; name: string; style: string; date: string | null; bottledDate: string | null; status: number; originalGravity: number | null; plannedGravity: number | null; ibu: number | null; ebc: number | null; volume: number | null; abv: number | null; malts: Ingredient[]; hops: Ingredient[]; yeast: string[]; fermentation: { date: string; extract: number; temperature: number }[] };
+export type Beer = { id: number; source_id: number; brew: Brew; public_number: number | null; published: boolean; display_name: string; description: string; tasting_notes: string; accent: string; image_url: string; updated_at: string };
