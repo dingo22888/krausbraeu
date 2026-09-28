@@ -7,3 +7,16 @@ export function database() { const url = process.env.NEON_BEER_DATABASE_URL || p
 export async function listBeers(published = true): Promise<Beer[]> { const fixture=localPreview(); if(fixture) return [fixture]; const sql=database(); const rows=published ? await sql`SELECT * FROM beer_entries WHERE published=true ORDER BY public_number DESC` : await sql`SELECT * FROM beer_entries ORDER BY (brew->>'date') DESC NULLS LAST, id DESC`; return rows as Beer[]; }
 export async function getBeer(number: number): Promise<Beer | null> { const fixture=localPreview(); if(fixture) return number===31?fixture:null; const sql=database(); const rows=await sql`SELECT * FROM beer_entries WHERE published=true AND public_number=${number}`; return (rows[0] as Beer)||null; }
 export async function getAdminBeer(id: number): Promise<Beer | null> { const sql=database(); const rows=await sql`SELECT * FROM beer_entries WHERE id=${id}`; return (rows[0] as Beer)||null; }
+
+export async function getBeerNeighbors(number:number):Promise<import('@/components/sud-navigation').SudNeighbor[]> {
+ if(localPreview())return [];
+ const sql=database();
+ const rows=await sql`
+  (SELECT public_number,COALESCE(NULLIF(display_name,''),brew->>'name') AS name,'previous' AS direction
+   FROM beer_entries WHERE published=true AND public_number<${number} ORDER BY public_number DESC LIMIT 1)
+  UNION ALL
+  (SELECT public_number,COALESCE(NULLIF(display_name,''),brew->>'name') AS name,'next' AS direction
+   FROM beer_entries WHERE published=true AND public_number>${number} ORDER BY public_number ASC LIMIT 1)
+ `;
+ return rows as import('@/components/sud-navigation').SudNeighbor[];
+}
