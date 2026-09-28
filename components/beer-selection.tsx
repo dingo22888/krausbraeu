@@ -1,4 +1,5 @@
 'use client';
+import { Arrow } from '@/components/arrow';
 import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
@@ -18,7 +19,7 @@ export function BeerSelection({items,action}:{items:Item[];action:(form:FormData
    <input type="checkbox" name="beer_id" value={b.id} id={`beer-${b.id}`} checked={selected.has(b.id)} onChange={()=>toggle(b.id)}/>
    <span className="archive-number">{b.number}</span>
    <div className="bulk-info"><label htmlFor={`beer-${b.id}`}>{b.name}</label><span>{b.date} · {b.published?'Veröffentlicht':'Privat'}{b.publicNumber!==null?` · /${b.publicNumber}`:''}</span><small><i className="color-dot" style={{backgroundColor:b.color}}/>{b.hasArtwork?'Artwork vorhanden':'Ohne Artwork'}</small></div>
-   <Link className="text-link" href={`/admin/beer/${b.id}`}>Bearbeiten ↗</Link>
+   <Link className="text-link" href={`/admin/beer/${b.id}`}>Bearbeiten <Arrow/></Link>
   </div>)}</div>
  </form>;
 }
