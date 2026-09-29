@@ -4,8 +4,11 @@ import type { CSSProperties } from 'react';
 import { listBeers } from '@/lib/db';
 import { dateLabel, statusLabel } from '@/components/beer-label';
 import { Arrow } from '@/components/arrow';
-export const dynamic='force-dynamic';
+import { connection } from 'next/server';
+export const revalidate = false;
 export default async function Home(){
+ // A local build without credentials cannot prerender real database content.
+ if (!process.env.VERCEL && !process.env.NEON_BEER_DATABASE_URL && !process.env.NEON_BEER_POSTGRES_URL) await connection();
  const beers=await listBeers();const latest=beers[0];
  return <>
   {latest?<section className="latest section" style={{'--accent':latest.accent} as CSSProperties}>

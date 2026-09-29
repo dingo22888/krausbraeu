@@ -5,7 +5,7 @@ Mobile Bieretiketten mit Next.js, Neon und SQLite-Import aus dem Kleinen Brauhel
 ## Betrieb
 
 - Node.js 24, `npm ci`, `npm run dev`.
-- `npm run build` führt additive Datenbankmigrationen aus und baut die Website. In Vercel muss die Neon-Variable `DATABASE_URL` (alternativ `POSTGRES_URL`) für die betreffende Umgebung verfügbar sein.
+- `npm run build` führt additive Datenbankmigrationen aus und baut die Website. In Vercel muss die Neon-Variable `NEON_BEER_DATABASE_URL` (alternativ `NEON_BEER_POSTGRES_URL`) für die betreffende Umgebung verfügbar sein.
 - Die erste Migration legt die KrausBräu-Tabellen an; der Initialimport veröffentlicht ausschließlich Sud 31. Weitere Sude kommen über den geschützten Admin-Import.
 - `npm test` prüft den SQLite-Parser. `npm run typecheck` prüft TypeScript.
 - Für eine lokale Designvorschau ohne Datenbank: `LOCAL_PREVIEW=1 npm run dev`. Diese Option ist in Vercel und Produktionsbuilds deaktiviert.
@@ -60,3 +60,9 @@ In `/admin` Sude auswählen (alle, nur private oder einzeln) und gemeinsam verö
 Die Akzentfarbe der dargestellten Bierseite gilt serverseitig auch für Header, Footer, Fokus- und Hoverzustände. Das Schwarz-Weiß-Logo bleibt unverändert.
 
 Die Sudnavigation unter den Kopfdaten verlinkt ausschließlich veröffentlichte Nachbarn nach öffentlicher Sudnummer, auch bei Lücken. Die SVG-Bierfarbe nutzt eine kontinuierlich interpolierte illustrative EBC-Palette (keine kalibrierte Farbmessung). Unbekannte Werte zeigen einen ungefüllten Krug. Akzentfarbe und Bierfarbe sind unabhängig.
+
+## Vorgerenderte Seiten
+
+Startseite und alle beim Build veröffentlichten Sudseiten werden auf Vercel vorgerendert (ISR ohne Zeitablauf). Neue öffentliche Nummern werden beim ersten Aufruf erzeugt und ebenfalls gecacht. Speichern, Import, Löschen und Mehrfach-Veröffentlichung invalidieren nach erfolgreicher Datenbankänderung die Übersicht, die betroffenen Sudnummern und ihre veröffentlichten Nachbarn. Die nächste Anfrage erzeugt die aktualisierte Seite; weitere Aufrufe nutzen wieder den Cache. Adminseiten bleiben dynamisch und authentifiziert.
+
+Direkte SQL-Änderungen außerhalb dieser Adminaktionen lösen keine Revalidierung aus; danach ist ein neuer Build nötig. Lokale Builds ohne Neon-Verbindung überspringen die Sud-Vorberechnung und rendern die Startseite erst zur Laufzeit; auf Vercel ist die Datenbank beim Build verpflichtend.

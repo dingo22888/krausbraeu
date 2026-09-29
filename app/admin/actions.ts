@@ -2,7 +2,7 @@
 import { randomUUID } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+import { revalidateBeers } from '@/lib/revalidate-beers';
 import { put } from '@vercel/blob';
 import { requireAdmin, COOKIE } from '@/lib/auth';
 import { database } from '@/lib/db';
@@ -18,30 +18,30 @@ export async function confirmImport(form:FormData) {
  if(!rows[0])redirect('/admin?error=batch');const brews=rows[0].payload as Brew[];
  let selection: ReturnType<typeof partitionSelection>;
  try {selection=partitionSelection(brews,form.getAll('source_id'));}catch{redirect(`/admin/import/${id}?error=selection`);}
- await sql.transaction([
-  ...selection.selected.map(b=>sql`INSERT INTO beer_entries(source_id,brew) VALUES(${b.sourceId},${JSON.stringify(b)}::jsonb) ON CONFLICT(source_id) DO UPDATE SET brew=EXCLUDED.brew,updated_at=now()`),
+ const results=await sql.transaction([
+  ...selection.selected.map(b=>sql`INSERT INTO beer_entries(source_id,brew) VALUES(${b.sourceId},${JSON.stringify(b)}::jsonb) ON CONFLICT(source_id) DO UPDATE SET brew=EXCLUDED.brew,updated_at=now() RETURNING public_number`),
   ...selection.selected.map(b=>sql`DELETE FROM beer_import_exclusions WHERE source_id=${b.sourceId}`),
   ...selection.skipped.map(b=>sql`INSERT INTO beer_import_exclusions(source_id) VALUES(${b.sourceId}) ON CONFLICT DO NOTHING`),
   sql`DELETE FROM beer_import_batches WHERE id=${id}::uuid`
  ]);
- revalidatePath('/','layout');redirect('/admin?success=import');
+ await revalidateBeers(results.slice(0,selection.selected.length).flat().map(row=>row.public_number));redirect('/admin?success=import');
 }
 export async function deleteBeer(form:FormData) {
  await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');
  if(form.get('confirmation')!=='LÖSCHEN')redirect(`/admin/beer/${id}?error=confirmation`);
  const sql=database();
- await sql.transaction([
+ const results=await sql.transaction([
   sql`INSERT INTO beer_import_exclusions(source_id) SELECT source_id FROM beer_entries WHERE id=${id} ON CONFLICT DO NOTHING`,
-  sql`DELETE FROM beer_entries WHERE id=${id}`
+  sql`DELETE FROM beer_entries WHERE id=${id} RETURNING public_number`
  ]);
- revalidatePath('/','layout');redirect('/admin?success=deleted');
+ await revalidateBeers(results[1].map(row=>row.public_number));redirect('/admin?success=deleted');
 }
 export async function saveBeer(form:FormData){await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');const returnTo=`/admin/beer/${id}`;const title=String(form.get('display_name')||'').trim().slice(0,120);const description=String(form.get('description')||'').trim().slice(0,4000);const tasting=String(form.get('tasting_notes')||'').trim().slice(0,4000);const color=String(form.get('accent')||'');const published=form.get('published')==='on';const rawNumber=String(form.get('public_number')||'');const number=rawNumber===''?null:Number(rawNumber);if(!/^#[\da-f]{6}$/i.test(color)||(number!==null&&(!Number.isSafeInteger(number)||number<=0||number>99999999))||(published&&number===null))redirect(returnTo+'?error=validation');
  const sql=database();const previous=await sql`SELECT image_url,public_number FROM beer_entries WHERE id=${id}`;if(!previous[0])redirect('/admin');let imageUrl=previous[0].image_url as string;
  const file=form.get('artwork');if(file instanceof File&&file.size>0){if(!process.env.BLOB_READ_WRITE_TOKEN)redirect(returnTo+'?error=storage');if(file.size>3*1024*1024)redirect(returnTo+'?error=image');const data=Buffer.from(await file.arrayBuffer());const png=data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));const jpg=data[0]===255&&data[1]===216&&data[2]===255;const webp=data.subarray(0,4).toString()==='RIFF'&&data.subarray(8,12).toString()==='WEBP';if(!png&&!jpg&&!webp)redirect(returnTo+'?error=image');const ext=png?'png':jpg?'jpg':'webp';const blob=await put(`beer/${id}/artwork.${ext}`,data,{access:'public',addRandomSuffix:true,contentType:png?'image/png':jpg?'image/jpeg':'image/webp'});imageUrl=blob.url;}
  // Preserve an already assigned public URL. Reimported source numbers never rename it.
  if(previous[0].public_number!==null&&previous[0].public_number!==number)redirect(returnTo+'?error=number');
- try{await sql`UPDATE beer_entries SET display_name=${title},description=${description},tasting_notes=${tasting},accent=${color},public_number=${number},published=${published},image_url=${imageUrl},updated_at=now() WHERE id=${id}`;}catch(error){if((error as {code?:string}).code==='23505')redirect(returnTo+'?error=duplicate');throw error;}revalidatePath('/','layout');redirect(returnTo+'?success=saved');}
+ try{await sql`UPDATE beer_entries SET display_name=${title},description=${description},tasting_notes=${tasting},accent=${color},public_number=${number},published=${published},image_url=${imageUrl},updated_at=now() WHERE id=${id}`;}catch(error){if((error as {code?:string}).code==='23505')redirect(returnTo+'?error=duplicate');throw error;}await revalidateBeers([number]);redirect(returnTo+'?success=saved');}
 
 export async function bulkPublication(form:FormData) {
  await requireAdmin();
@@ -67,9 +67,9 @@ export async function bulkPublication(form:FormData) {
    UPDATE beer_entries e SET published=${publishing},
     public_number=CASE WHEN ${publishing} THEN s.target ELSE e.public_number END,
     updated_at=now()
-   FROM selected s,valid v WHERE e.id=s.id AND v.ok RETURNING e.id
+   FROM selected s,valid v WHERE e.id=s.id AND v.ok RETURNING e.id,e.public_number
   `;
  }catch(error){if((error as {code?:string}).code==='23505')redirect('/admin?error=publication');throw error;}
  if(changed.length!==ids.length)redirect('/admin?error=publication');
- revalidatePath('/','layout');redirect(`/admin?success=${publishing?'published':'private'}&count=${changed.length}`);
+ await revalidateBeers(changed.map(row=>row.public_number));redirect(`/admin?success=${publishing?'published':'private'}&count=${changed.length}`);
 }
