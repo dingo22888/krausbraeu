@@ -66,11 +66,3 @@ Die Sudnavigation unter den Kopfdaten verlinkt ausschließlich veröffentlichte 
 Startseite und alle beim Build veröffentlichten Sudseiten werden auf Vercel vorgerendert (ISR ohne Zeitablauf). Neue öffentliche Nummern werden beim ersten Aufruf erzeugt und ebenfalls gecacht. Speichern, Import, Löschen und Mehrfach-Veröffentlichung invalidieren nach erfolgreicher Datenbankänderung die Übersicht, die betroffenen Sudnummern und ihre veröffentlichten Nachbarn. Die nächste Anfrage erzeugt die aktualisierte Seite; weitere Aufrufe nutzen wieder den Cache. Adminseiten bleiben dynamisch und authentifiziert.
 
 Direkte SQL-Änderungen außerhalb dieser Adminaktionen lösen keine Revalidierung aus; danach ist ein neuer Build nötig. Lokale Builds ohne Neon-Verbindung überspringen die Sud-Vorberechnung und rendern die Startseite erst zur Laufzeit; auf Vercel ist die Datenbank beim Build verpflichtend.
-
-## Etiketten-Mockups und Galerie
-
-Die Detailseite zeigt Artwork, Flasche und Kiste in einer Scroll-Snap-Galerie. Der Server rendert das erste Artwork sowie die Szenen ohne zusätzliche Datenbankabfragen vor. Nach der Hydrierung kommen Pfeile, Punkte und Tastaturbedienung hinzu. Kein Autoplay; reduzierte Bewegung wird berücksichtigt. Die bestehende ISR-Revalidierung umfasst die Galerie automatisch.
-
-`BeerMoodScene` nimmt `{ beer: { name, number, artwork, accent }, type: 'bottle' | 'crate' }` entgegen und zeichnet ein SVG-Mockup. `BeerMood` ist die serverseitige Variante mit `sudId` (= interne `beer_entries.id`, nicht `source_id` oder öffentliche Sudnummer) und `type`; sie lädt ausschließlich veröffentlichte Einträge. Private Vorschauen nutzen die bereits authentifiziert geladenen Daten über `BeerLabel`.
-
-Die Szenen sind stilisierte Etikettenentwürfe, keine Fotos tatsächlich produzierter Flaschen oder Kisten. Neue Motive und Farben werden automatisch übernommen; für weitere Mood-Typen kann der Renderer erweitert werden.
