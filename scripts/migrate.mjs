@@ -25,3 +25,11 @@ await sql.transaction([
  sql`INSERT INTO beer_schema_migrations(version) VALUES(3) ON CONFLICT DO NOTHING`
 ]);
 console.log('Redaktionelle Ergänzungen geprüft. Veröffentlichungsstatus unverändert.');
+// Explicit editorial request for an already imported, possibly private recipe.
+// Execute the DO block whole; splitting on semicolons would corrupt PL/pgSQL.
+const emberheadMigration=await readFile(new URL('../migrations/004_emberhead_editorial.sql',import.meta.url),'utf8');
+await sql.transaction([
+ sql`SELECT pg_advisory_xact_lock(312026)`,
+ sql.query(emberheadMigration)
+]);
+console.log('EMBERHEAD artwork, description and accent applied or already migrated; publication unchanged.');
