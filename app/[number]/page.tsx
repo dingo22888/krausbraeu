@@ -1,3 +1,4 @@
+import { beerMetadata } from '@/lib/beer-metadata';
 import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import { getBeer, getBeerNeighbors, listBeers } from '@/lib/db';
@@ -11,5 +12,5 @@ export async function generateStaticParams() {
 }
 const lookupBeer = cache(getBeer);
 async function lookup(params:Promise<{number:string}>){const {number}=await params;if(!/^[1-9]\d{0,8}$/.test(number))return null;return lookupBeer(Number(number));}
-export async function generateMetadata({params}:{params:Promise<{number:string}>}){const beer=await lookup(params);return {title:beer?`${beer.display_name||beer.brew.name} · Sud ${beer.public_number}`:'Sud nicht gefunden'};}
+export async function generateMetadata({params}:{params:Promise<{number:string}>}){const beer=await lookup(params);return beer?beerMetadata(beer):{title:'Sud nicht gefunden'};}
 export default async function Page({params}:{params:Promise<{number:string}>}){const beer=await lookup(params);if(!beer)notFound();const neighbors=await getBeerNeighbors(beer.public_number!);return <BeerLabel beer={beer} navigation={<SudNavigation neighbors={neighbors}/>}/>;}

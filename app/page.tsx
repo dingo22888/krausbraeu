@@ -1,3 +1,4 @@
+import { beerMetadata } from '@/lib/beer-metadata';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
@@ -6,6 +7,10 @@ import { dateLabel, statusLabel } from '@/components/beer-label';
 import { Arrow } from '@/components/arrow';
 import { connection } from 'next/server';
 export const revalidate = false;
+export async function generateMetadata(){
+ if(!process.env.VERCEL&&!process.env.NEON_BEER_DATABASE_URL&&!process.env.NEON_BEER_POSTGRES_URL)return {};
+ const [latest]=await listBeers();return latest?beerMetadata(latest,true):{};
+}
 export default async function Home(){
  // A local build without credentials cannot prerender real database content.
  if (!process.env.VERCEL && !process.env.NEON_BEER_DATABASE_URL && !process.env.NEON_BEER_POSTGRES_URL) await connection();
