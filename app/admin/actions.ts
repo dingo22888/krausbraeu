@@ -7,6 +7,8 @@ import { put } from '@vercel/blob';
 import { requireAdmin, COOKIE } from '@/lib/auth';
 import { database } from '@/lib/db';
 import { parseSqlite } from '@/lib/import-sqlite';
+import { beerImages, editImages } from '@/lib/beer-images';
+import type { Beer } from '@/lib/types';
 import type { Brew } from '@/lib/types';
 import { publicationIds } from '@/lib/publication';
 import { partitionSelection } from '@/lib/import-selection';
@@ -37,11 +39,10 @@ export async function deleteBeer(form:FormData) {
  await revalidateBeers(results[1].map(row=>row.public_number));redirect('/admin?success=deleted');
 }
 export async function saveBeer(form:FormData){await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');const returnTo=`/admin/beer/${id}`;const title=String(form.get('display_name')||'').trim().slice(0,120);const description=String(form.get('description')||'').trim().slice(0,4000);const tasting=String(form.get('tasting_notes')||'').trim().slice(0,4000);const color=String(form.get('accent')||'');const published=form.get('published')==='on';const rawNumber=String(form.get('public_number')||'');const number=rawNumber===''?null:Number(rawNumber);if(!/^#[\da-f]{6}$/i.test(color)||(number!==null&&(!Number.isSafeInteger(number)||number<=0||number>99999999))||(published&&number===null))redirect(returnTo+'?error=validation');
- const sql=database();const previous=await sql`SELECT image_url,public_number FROM beer_entries WHERE id=${id}`;if(!previous[0])redirect('/admin');let imageUrl=previous[0].image_url as string;
- const file=form.get('artwork');if(file instanceof File&&file.size>0){if(!process.env.BLOB_READ_WRITE_TOKEN)redirect(returnTo+'?error=storage');if(file.size>3*1024*1024)redirect(returnTo+'?error=image');const data=Buffer.from(await file.arrayBuffer());const png=data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));const jpg=data[0]===255&&data[1]===216&&data[2]===255;const webp=data.subarray(0,4).toString()==='RIFF'&&data.subarray(8,12).toString()==='WEBP';if(!png&&!jpg&&!webp)redirect(returnTo+'?error=image');const ext=png?'png':jpg?'jpg':'webp';const blob=await put(`beer/${id}/artwork.${ext}`,data,{access:'public',addRandomSuffix:true,contentType:png?'image/png':jpg?'image/jpeg':'image/webp'});imageUrl=blob.url;}
+ const sql=database();const previous=await sql`SELECT image_url,public_number FROM beer_entries WHERE id=${id}`;if(!previous[0])redirect('/admin');
  // Preserve an already assigned public URL. Reimported source numbers never rename it.
  if(previous[0].public_number!==null&&previous[0].public_number!==number)redirect(returnTo+'?error=number');
- try{await sql`UPDATE beer_entries SET display_name=${title},description=${description},tasting_notes=${tasting},accent=${color},public_number=${number},published=${published},image_url=${imageUrl},updated_at=now() WHERE id=${id}`;}catch(error){if((error as {code?:string}).code==='23505')redirect(returnTo+'?error=duplicate');throw error;}await revalidateBeers([number]);redirect(returnTo+'?success=saved');}
+ try{await sql`UPDATE beer_entries SET display_name=${title},description=${description},tasting_notes=${tasting},accent=${color},public_number=${number},published=${published},updated_at=now() WHERE id=${id}`;}catch(error){if((error as {code?:string}).code==='23505')redirect(returnTo+'?error=duplicate');throw error;}await revalidateBeers([number]);redirect(returnTo+'?success=saved');}
 
 export async function bulkPublication(form:FormData) {
  await requireAdmin();
@@ -72,4 +73,25 @@ export async function bulkPublication(form:FormData) {
  }catch(error){if((error as {code?:string}).code==='23505')redirect('/admin?error=publication');throw error;}
  if(changed.length!==ids.length)redirect('/admin?error=publication');
  await revalidateBeers(changed.map(row=>row.public_number));redirect(`/admin?success=${publishing?'published':'private'}&count=${changed.length}`);
+}
+
+export async function saveImages(form:FormData){
+ await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');
+ const sql=database();const [beer]=await sql`SELECT * FROM beer_entries WHERE id=${id}`;if(!beer)redirect('/admin');
+ const back=`/admin/beer/${id}`;let images;
+ try{if(JSON.stringify(beer.images??null)!==String(form.get('snapshot')))throw new Error('Conflict');images=editImages(String(form.get('images')),beerImages(beer as Beer));}catch{redirect(back+'?error=gallery');}
+ const changed=await sql`UPDATE beer_entries SET images=${JSON.stringify(images)}::jsonb,image_url=${images[0]?.url??''},updated_at=now() WHERE id=${id} AND images IS NOT DISTINCT FROM ${beer.images==null?null:JSON.stringify(beer.images)}::jsonb RETURNING public_number`;
+ if(!changed.length)redirect(back+'?error=gallery');await revalidateBeers(changed.map(row=>row.public_number));redirect(back+'?success=saved');
+}
+export async function uploadImage(form:FormData){
+ await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');const back=`/admin/beer/${id}`;
+ const sql=database();const [beer]=await sql`SELECT * FROM beer_entries WHERE id=${id}`;if(!beer)redirect('/admin');
+ if(!process.env.BLOB_READ_WRITE_TOKEN)redirect(back+'?error=storage');
+ const file=form.get('artwork');if(!(file instanceof File)||file.size===0||file.size>3*1024*1024||beerImages(beer as Beer).length>=30)redirect(back+'?error=image');
+ const data=Buffer.from(await file.arrayBuffer());const png=data.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));const jpg=data[0]===255&&data[1]===216&&data[2]===255;const webp=data.subarray(0,4).toString()==='RIFF'&&data.subarray(8,12).toString()==='WEBP';
+ if(!png&&!jpg&&!webp)redirect(back+'?error=image');const ext=png?'png':jpg?'jpg':'webp';
+ const blob=await put(`beer/${id}/photo.${ext}`,data,{access:'public',addRandomSuffix:true,contentType:png?'image/png':jpg?'image/jpeg':'image/webp'});
+ const images=[...beerImages(beer as Beer),{id:randomUUID(),url:blob.url,caption:String(form.get('caption')||'').trim().slice(0,300)}];
+ const changed=await sql`UPDATE beer_entries SET images=${JSON.stringify(images)}::jsonb,image_url=${images[0].url},updated_at=now() WHERE id=${id} AND images IS NOT DISTINCT FROM ${beer.images==null?null:JSON.stringify(beer.images)}::jsonb RETURNING public_number`;
+ if(!changed.length)redirect(back+'?error=gallery');await revalidateBeers(changed.map(row=>row.public_number));redirect(back+'?success=saved');
 }

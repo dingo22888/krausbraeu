@@ -33,3 +33,6 @@ await sql.transaction([
  sql.query(emberheadMigration)
 ]);
 console.log('EMBERHEAD artwork, description and accent applied or already migrated; publication unchanged.');
+const galleryMigration=await readFile(new URL('../migrations/005_beer_images.sql',import.meta.url),'utf8');
+await sql.transaction([sql`SELECT pg_advisory_xact_lock(312026)`,sql.query(galleryMigration)]);
+console.log('Bildergalerie migriert; Veröffentlichungen unverändert.');
