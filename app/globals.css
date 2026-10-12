@@ -62,3 +62,5 @@
 }
 
 .share-beer{position:relative;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.share-beer-button{padding:0;border:0;border-radius:0;min-height:0;background:transparent;color:inherit;font-weight:400;gap:8px}.share-beer-button:hover{background:transparent;color:var(--accent)}.share-feedback{font-size:12px;color:var(--muted)}.share-feedback:empty{display:none}.share-beer input{width:100%;max-width:280px;background:var(--panel);color:var(--text);border:1px solid var(--line);padding:8px}
+
+.beer-hero-actions .text-link{gap:8px}.beer-hero-actions .text-link svg{width:18px;height:18px;flex-shrink:0}
