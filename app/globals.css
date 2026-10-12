@@ -40,3 +40,23 @@
 .upload-crop-editor input[type=range]{padding:0;accent-color:var(--accent)}
 
 .beer-hero-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap}.edit-beer-link{display:inline-flex;align-items:center;gap:8px}
+
+/* Bound Swiper before it measures slides, including in the mobile flex column. */
+.beer-gallery{width:100%;max-width:100%;min-height:0}
+.gallery-swiper{position:relative;min-width:0;max-width:100%;height:auto;aspect-ratio:1;touch-action:pan-y}
+.gallery-swiper>.swiper-wrapper{position:absolute;inset:0;width:100%;height:100%}
+.gallery-swiper .swiper-slide{height:100%;min-width:0}
+.sud-navigation{padding:8px 48px;gap:20px;min-height:60px}
+.sud-nav-link{min-height:44px;gap:10px}
+.sud-nav-link small{margin:0;line-height:1.3}
+.sud-nav-link strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;line-height:1.4}
+.sud-nav-all{min-height:44px;display:flex;align-items:center}
+@media(max-width:760px){
+ .sud-navigation{padding:4px 22px;gap:10px;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);min-height:52px}
+ .sud-nav-all{grid-row:auto;grid-column:auto;padding:0 4px;font-size:11px}
+ .sud-nav-link{gap:5px;font-size:12px}
+ .sud-nav-link strong{display:none}
+ .sud-nav-link small{font-size:11px;color:var(--text)}
+ .sud-nav-boundary{font-size:10px;line-height:1.3}
+ .hero-copy{padding-top:26px}
+}
