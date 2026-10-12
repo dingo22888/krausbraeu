@@ -1,0 +1,23 @@
+Gurgelrutscher artwork refresh, 2026-10-12
+Verified live recipe: obergäriges Helles; about 10 EBC, 25 IBU, 6.6% vol,
+Pale-Ale-Malz, Weizen, Carapils, Haferflocken; Magnum, Nottingham.
+
+Raw artwork direction:
+Original square 1:1 premium craft beer artwork. A luminous golden beer river
+winds in a broad S curve through dark slate rock and shadowy woodland,
+cascading over small rock steps with creamy ivory foam. Golden malt warmth,
+refreshing flowing character, no fire or lava. Restrained mature rock album
+atmosphere, detailed engraving mixed with painterly light. Barley, wheat and
+oat seed heads frame the foreground; only subtle hop accents. Charcoal,
+antique gold, ivory and muted forest green. Full bleed, readable at thumbnail
+size, no text, glass, bottle, people, skull, helmet or watermark.
+
+Label edit direction (using the raw artwork as reference):
+Retain the exact golden river, cascades, rocks, woodland, horizon and grain
+framing. Square 1:1, professional integrated typography with safe margins.
+Exact text: KrausBräu (top), Gurgelrutscher (large, gentle arc),
+Obergäriges Helles (bottom). Classic rock lettering, warm ivory and antique
+gold, restrained premium craft label. No additional text, numbers, alcohol
+claims, bottle mockup or cropped letters. Keep the central cascades visible.
+
+Generated originals: 1254 x 1254 PNG; web delivery: WebP quality 88.
