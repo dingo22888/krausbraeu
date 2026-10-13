@@ -41,3 +41,6 @@ await sql.transaction([sql`SELECT pg_advisory_xact_lock(312026)`,sql.query(gurge
 console.log('Gurgelrutscher-Artworks aktualisiert; Braudaten und Veröffentlichung unverändert.');
 const blobCleanup=await readFile(new URL('../migrations/007_blob_cleanup.sql',import.meta.url),'utf8');
 await sql.transaction([sql`SELECT pg_advisory_xact_lock(312026)`,sql.query(blobCleanup),sql`INSERT INTO beer_schema_migrations(version) VALUES(7) ON CONFLICT DO NOTHING`]);
+
+const recipeProfile=await readFile(new URL('../migrations/008_recipe_profile.sql',import.meta.url),'utf8');
+await sql.transaction([sql`SELECT pg_advisory_xact_lock(312026)`,sql.query(recipeProfile),sql`INSERT INTO beer_schema_migrations(version) VALUES(8) ON CONFLICT DO NOTHING`]);

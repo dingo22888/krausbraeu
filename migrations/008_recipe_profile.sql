@@ -1,0 +1,1 @@
+ALTER TABLE beer_entries ADD COLUMN IF NOT EXISTS recipe_headline text NOT NULL DEFAULT '', ADD COLUMN IF NOT EXISTS recipe_note text NOT NULL DEFAULT '';

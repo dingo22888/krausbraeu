@@ -64,3 +64,27 @@
 .share-beer{position:relative;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.share-beer-button{padding:0;border:0;border-radius:0;min-height:0;background:transparent;color:inherit;font-weight:400;gap:8px}.share-beer-button:hover{background:transparent;color:var(--accent)}.share-feedback{font-size:12px;color:var(--muted)}.share-feedback:empty{display:none}.share-beer input{width:100%;max-width:280px;background:var(--panel);color:var(--text);border:1px solid var(--line);padding:8px}
 
 .beer-hero-actions .text-link{gap:8px}.beer-hero-actions .text-link svg{width:18px;height:18px;flex-shrink:0}
+
+/* Recipe profile: individual character and precise ingredient quantities. */
+.recipe-profile>div,.recipe-profile .ingredient>div{min-width:0}
+.recipe-profile .section-intro h2{max-width:12ch;overflow-wrap:anywhere;text-wrap:balance}
+.recipe-facts{display:flex;flex-wrap:wrap;gap:24px;margin:32px 0 12px;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.recipe-facts dt{font-size:11px;color:var(--muted)}
+.recipe-facts dd{margin:5px 0 0;font-family:'Barlow Condensed',sans-serif;font-size:32px;line-height:1.1}
+.recipe-facts dd span{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted)}
+.recipe-context{display:block;font-size:11px;line-height:1.5;color:var(--muted)}
+.ingredient-symbol{width:30px;height:38px;color:var(--accent)}
+.recipe-profile .ingredient{grid-template-columns:30px minmax(0,1fr);gap:18px}
+.recipe-malt{margin-bottom:22px}
+.recipe-malt .malt-heading{align-items:baseline;flex-wrap:wrap;gap:4px 12px}
+.recipe-malt .malt-heading>span{flex:1;min-width:120px}
+.recipe-malt .malt-heading strong{color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.recipe-malt .malt-heading strong span{color:var(--muted);font-size:12px}
+.malt-color{display:flex;align-items:center;gap:7px;margin:5px 0}
+.malt-color small{font-size:11px;color:var(--muted)}
+.recipe-additions{list-style:none;padding:0;margin:0}
+.recipe-additions li+li{margin-top:16px}
+.recipe-additions li>div{display:flex;justify-content:space-between;gap:5px 16px;flex-wrap:wrap;font-size:14px}
+.recipe-additions strong{font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
+.recipe-additions small{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+@media(max-width:760px){.recipe-profile .section-intro h2{max-width:18ch;font-size:clamp(2.2rem,9vw,3rem);margin-bottom:18px}.recipe-facts{margin-top:22px;gap:18px}.recipe-profile .ingredient{gap:12px}.recipe-profile{gap:30px}}
