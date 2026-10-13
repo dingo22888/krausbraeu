@@ -88,3 +88,13 @@
 .recipe-additions strong{font-weight:500;white-space:nowrap;font-variant-numeric:tabular-nums}
 .recipe-additions small{display:block;font-size:12px;color:var(--muted);margin-top:3px}
 @media(max-width:760px){.recipe-profile .section-intro h2{max-width:18ch;font-size:clamp(2.2rem,9vw,3rem);margin-bottom:18px}.recipe-facts{margin-top:22px;gap:18px}.recipe-profile .ingredient{gap:12px}.recipe-profile{gap:30px}}
+
+.hop-timing{margin:16px 4px 22px 0}
+.hop-timing-track{position:relative;height:10px;padding-left:32px}
+.hop-boil-track{position:relative;height:3px;top:3px;background:var(--line);border-radius:2px}
+.hop-boil-track:before,.hop-boil-track:after{content:'';position:absolute;top:-3px;width:1px;height:9px;background:var(--muted)}
+.hop-boil-track:before{left:0}.hop-boil-track:after{right:0}
+.hop-boil-track i,.hop-first-wort i{position:absolute;z-index:1;top:-3px;width:9px;height:9px;background:var(--accent);border-radius:50%;transform:translateX(-50%);box-shadow:0 0 0 3px var(--bg)}
+.hop-first-wort{position:absolute;left:4px;top:6px;width:24px;border-top:1px dashed var(--muted)}
+.hop-first-wort i{top:-5px;left:0;border-radius:1px;transform:translateX(-50%) rotate(45deg)}
+.recipe-additions .hop-timing-labels{display:flex;justify-content:space-between;gap:8px;margin:5px 0 0 32px;font-size:10px;color:var(--muted)}
