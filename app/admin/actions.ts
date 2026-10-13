@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidateBeers } from '@/lib/revalidate-beers';
+import { cleanupBlobs } from '@/lib/blob-cleanup';
 import { put } from '@vercel/blob';
 import { requireAdmin, COOKIE } from '@/lib/auth';
 import { database } from '@/lib/db';
@@ -34,9 +35,11 @@ export async function deleteBeer(form:FormData) {
  const sql=database();
  const results=await sql.transaction([
   sql`INSERT INTO beer_import_exclusions(source_id) SELECT source_id FROM beer_entries WHERE id=${id} ON CONFLICT DO NOTHING`,
-  sql`DELETE FROM beer_entries WHERE id=${id} RETURNING public_number`
+  sql`WITH removed AS (DELETE FROM beer_entries WHERE id=${id} RETURNING public_number,images,image_url), queued AS (
+ INSERT INTO beer_blob_cleanup(url,beer_id) SELECT image->>'url',${id} FROM removed,jsonb_array_elements(COALESCE(images,jsonb_build_array(jsonb_build_object('url',image_url)))) image WHERE image->>'url' LIKE 'https://fsaen4cfpqghbymz.public.blob.vercel-storage.com/beer/%' ON CONFLICT DO NOTHING
+ ) SELECT public_number FROM removed`
  ]);
- await revalidateBeers(results[1].map(row=>row.public_number));redirect('/admin?success=deleted');
+ await revalidateBeers(results[1].map(row=>row.public_number));await cleanupBlobs();redirect('/admin?success=deleted');
 }
 export async function saveBeer(form:FormData){await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');const returnTo=`/admin/beer/${id}`;const title=String(form.get('display_name')||'').trim().slice(0,120);const description=String(form.get('description')||'').trim().slice(0,4000);const tasting=String(form.get('tasting_notes')||'').trim().slice(0,4000);const color=String(form.get('accent')||'');const published=form.get('published')==='on';const rawNumber=String(form.get('public_number')||'');const number=rawNumber===''?null:Number(rawNumber);if(!/^#[\da-f]{6}$/i.test(color)||(number!==null&&(!Number.isSafeInteger(number)||number<=0||number>99999999))||(published&&number===null))redirect(returnTo+'?error=validation');
  const sql=database();const previous=await sql`SELECT image_url,public_number FROM beer_entries WHERE id=${id}`;if(!previous[0])redirect('/admin');
@@ -80,8 +83,13 @@ export async function saveImages(form:FormData){
  const sql=database();const [beer]=await sql`SELECT * FROM beer_entries WHERE id=${id}`;if(!beer)redirect('/admin');
  const back=`/admin/beer/${id}`;let images;
  try{if(JSON.stringify(beer.images??null)!==String(form.get('snapshot')))throw new Error('Conflict');images=editImages(String(form.get('images')),beerImages(beer as Beer));}catch{redirect(back+'?error=gallery');}
- const changed=await sql`UPDATE beer_entries SET images=${JSON.stringify(images)}::jsonb,image_url=${images[0]?.url??''},updated_at=now() WHERE id=${id} AND images IS NOT DISTINCT FROM ${beer.images==null?null:JSON.stringify(beer.images)}::jsonb RETURNING public_number`;
- if(!changed.length)redirect(back+'?error=gallery');await revalidateBeers(changed.map(row=>row.public_number));redirect(back+'?success=saved');
+ const removed=beerImages(beer as Beer).filter(old=>!images.some(image=>image.url===old.url)&&old.url.startsWith('https://fsaen4cfpqghbymz.public.blob.vercel-storage.com/beer/'));
+ const changed=await sql`WITH changed AS (
+ UPDATE beer_entries SET images=${JSON.stringify(images)}::jsonb,image_url=${images[0]?.url??''},updated_at=now() WHERE id=${id} AND images IS NOT DISTINCT FROM ${beer.images==null?null:JSON.stringify(beer.images)}::jsonb RETURNING public_number
+ ), queued AS (
+ INSERT INTO beer_blob_cleanup(url,beer_id) SELECT item->>'url',${id} FROM jsonb_array_elements(${JSON.stringify(removed)}::jsonb) item WHERE EXISTS(SELECT 1 FROM changed) ON CONFLICT DO NOTHING
+ ) SELECT public_number FROM changed`;
+ if(!changed.length)redirect(back+'?error=gallery');await revalidateBeers(changed.map(row=>row.public_number));const pending=await cleanupBlobs();redirect(back+(pending?'?error=cleanup':'?success=saved'));
 }
 export async function uploadImage(form:FormData){
  await requireAdmin();const id=Number(form.get('id'));if(!Number.isSafeInteger(id)||id<1)redirect('/admin');const back=`/admin/beer/${id}`;
@@ -95,3 +103,5 @@ export async function uploadImage(form:FormData){
  const changed=await sql`UPDATE beer_entries SET images=${JSON.stringify(images)}::jsonb,image_url=${images[0].url},updated_at=now() WHERE id=${id} AND images IS NOT DISTINCT FROM ${beer.images==null?null:JSON.stringify(beer.images)}::jsonb RETURNING public_number`;
  if(!changed.length)redirect(back+'?error=gallery');await revalidateBeers(changed.map(row=>row.public_number));redirect(back+'?success=saved');
 }
+
+export async function retryBlobCleanup(){await requireAdmin();const remaining=await cleanupBlobs();redirect(remaining?'/admin?error=cleanup':'/admin?success=cleanup');}

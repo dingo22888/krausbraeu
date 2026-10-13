@@ -39,3 +39,5 @@ console.log('Bildergalerie migriert; Veröffentlichungen unverändert.');
 const gurgelrutscherArtwork=await readFile(new URL('../migrations/006_gurgelrutscher_artwork.sql',import.meta.url),'utf8');
 await sql.transaction([sql`SELECT pg_advisory_xact_lock(312026)`,sql.query(gurgelrutscherArtwork)]);
 console.log('Gurgelrutscher-Artworks aktualisiert; Braudaten und Veröffentlichung unverändert.');
+const blobCleanup=await readFile(new URL('../migrations/007_blob_cleanup.sql',import.meta.url),'utf8');
+await sql.transaction([sql`SELECT pg_advisory_xact_lock(312026)`,sql.query(blobCleanup),sql`INSERT INTO beer_schema_migrations(version) VALUES(7) ON CONFLICT DO NOTHING`]);
