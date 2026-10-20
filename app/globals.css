@@ -149,11 +149,11 @@
 .timeline-year+.timeline-year{margin-top:44px}
 .timeline-events{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:28px}
 .timeline-event{position:relative;width:calc(50% - 38px);min-width:0;align-self:flex-start}
-.timeline-event:nth-child(even){align-self:flex-end}
+.timeline-event.event-side-right{align-self:flex-end}
 .timeline-event:before{content:'';position:absolute;top:34px;left:100%;width:38px;height:1px;background:var(--accent);opacity:.55}
-.timeline-event:nth-child(even):before{left:auto;right:100%}
+.timeline-event.event-side-right:before{left:auto;right:100%}
 .event-node{position:absolute;top:29px;right:-44px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--accent)}
-.timeline-event:nth-child(even) .event-node{right:auto;left:-44px}
+.timeline-event.event-side-right .event-node{right:auto;left:-44px}
 .event-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:0;box-shadow:0 12px 32px #0002;transition:border-color .18s ease}
 .event-card:hover{border-color:var(--accent);color:var(--text)}
 .event-art{position:relative;aspect-ratio:1;background:var(--bg);overflow:hidden}
@@ -176,7 +176,7 @@
 .event-bottled .event-open{margin-top:10px}
 .timeline-end{position:relative;z-index:1;background:var(--bg);padding:20px 12px;margin:40px auto 0;width:max-content;max-width:100%;font-size:12px;text-align:center}
 .history-empty{padding:30px;border:1px solid var(--line);border-radius:8px}
-@media(min-width:1000px){.timeline-events{gap:0}.timeline-event+.timeline-event{margin-top:-60px}.timeline-event.event-bottled+.timeline-event{margin-top:24px}}
+
 @media(max-width:760px){
  .brew-intro{padding:32px 22px 28px}.brew-intro h1{font-size:clamp(3rem,13vw,4.5rem)}
  .brew-collection{padding-top:24px}.collection-tools{gap:16px;margin-bottom:24px}.collection-switch{width:100%}.collection-switch button{flex:1;padding:10px 8px}
@@ -184,11 +184,46 @@
  .upcoming-brews{padding:18px}.history-summary{font-size:11px}
  .timeline-events{gap:36px}.timeline-event{width:calc(100% - 20px)}
  .timeline-event:before{top:-18px;left:calc(50% + 10px);height:18px;width:1px}
- .timeline-event:nth-child(even):before{left:calc(50% - 10px);right:auto}
+ .timeline-event.event-side-right:before{left:calc(50% - 10px);right:auto}
  .event-node{top:-23px;right:auto;left:calc(50% + 4px)}
- .timeline-event:nth-child(even) .event-node{left:calc(50% - 16px)}
+ .timeline-event.event-side-right .event-node{left:calc(50% - 16px)}
  .timeline-year-label{margin-bottom:36px}.event-copy{padding:18px}.event-copy h4{font-size:30px}
  .event-bottled .event-art{flex-basis:64px;margin-left:12px}.event-bottled .event-copy{padding:14px 12px}.event-bottled .event-copy h4{font-size:24px}
  .event-bottled .event-meta{gap:4px}.timeline-year+.timeline-year{margin-top:36px}
 }
 @media(prefers-reduced-motion:reduce){.event-card{transition:none}}
+
+/* Quieter navigation and a personal introduction. */
+.brew-intro{display:flex;align-items:center;justify-content:space-between;gap:32px;padding-top:34px;padding-bottom:30px}
+.brew-intro h1{font-size:clamp(2.8rem,4.7vw,4.2rem);margin:12px 0 16px}
+.brew-intro p{font-size:14px}.brew-intro p>span{margin:0 8px;color:var(--accent)}
+.intro-portrait{flex:0 0 180px}.intro-portrait .logo-portrait{width:100%;height:auto}
+.collection-tools{margin-bottom:22px;gap:16px}
+.collection-switch{padding:0;background:none;border:0;border-radius:0;gap:4px;width:auto}
+.collection-switch button{position:relative;flex:none;padding:12px;width:44px;height:44px;min-height:44px;border-radius:3px;color:var(--muted)}
+.collection-switch button[aria-pressed=true]{background:none;color:var(--accent)}
+.collection-switch button[aria-pressed=true]:after{content:'';position:absolute;bottom:1px;left:13px;right:13px;height:2px;background:var(--accent)}
+.collection-switch button[aria-pressed=true]:hover{background:var(--panel);color:var(--accent)}
+.collection-switch button:hover{background:var(--panel);color:var(--text)}
+.history-filter{width:auto;gap:10px}
+.history-select{position:relative;display:block}
+.history-select select{appearance:none;-webkit-appearance:none;padding:10px 42px 10px 14px;min-width:132px;background:transparent}
+.history-select>svg{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;pointer-events:none;fill:none;stroke:currentColor;stroke-width:1.5}
+.upcoming-brews{padding:14px 0 20px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none;margin-bottom:24px}
+.upcoming-brews>div{margin-top:12px}.upcoming-brews a{gap:14px}
+.upcoming-art{position:relative;flex:0 0 64px;height:64px;display:grid;place-items:center;background:var(--panel);color:var(--accent);font-weight:600}
+.upcoming-art img{object-fit:contain}
+.timeline-milestone{position:relative;align-self:center;max-width:calc(100% - 32px);width:380px;padding:10px 0;background:var(--bg)}
+.milestone-card{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--text)}
+.milestone-card:hover{border-color:var(--accent)}
+.milestone-art{position:relative;flex:0 0 44px;height:44px}.milestone-art img{object-fit:contain}
+.milestone-copy{flex:1;min-width:0}.milestone-copy time{display:block;font-size:11px;color:var(--accent);margin-bottom:3px}.milestone-copy strong{display:block;font-size:14px;font-weight:500;overflow-wrap:anywhere;line-height:1.4}
+.milestone-card>svg{width:16px;flex-shrink:0;color:var(--muted)}
+@media(max-width:760px){
+ .brew-intro{gap:14px;padding-top:26px;padding-bottom:24px;align-items:center}
+ .brew-intro h1{font-size:clamp(2rem,7.6vw,3.5rem);margin:10px 0 14px}
+ .brew-intro p{font-size:12px}.brew-intro .eyebrow{font-size:10px;letter-spacing:1.6px}
+ .intro-portrait{flex-basis:88px}.collection-tools{flex-wrap:nowrap;gap:10px}.history-filter{font-size:11px}
+ .timeline-milestone{width:calc(100% - 24px);max-width:380px}.milestone-card{padding:10px 12px;gap:10px}
+ .upcoming-brews{padding:8px 0 18px}.upcoming-brews strong{font-size:17px}
+}
