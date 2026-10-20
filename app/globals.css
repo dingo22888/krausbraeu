@@ -102,7 +102,12 @@
 
 /* KrausBräu logo family */
 .brand{display:block;flex-shrink:0;width:240px;height:64px;overflow:hidden}
-.brand img{display:block;width:100%;height:100%;object-fit:cover}
+.logo-wordmark{display:block;width:100%;height:100%;overflow:visible}
+.logo-primary{fill:var(--text);transition:fill .18s ease}
+.logo-accent{fill:var(--accent)}
+.brand:hover .logo-primary,.brand:focus-visible .logo-primary{fill:var(--accent)}
+.logo-portrait{display:block;width:160px;height:160px}
+@media(prefers-reduced-motion:reduce){.logo-primary{transition:none}}
 .brand-drive-link{margin:20px 0 32px}
 .brand-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
 .brand-card{min-width:0;border:1px solid var(--line);padding:20px;background:var(--bg)}
