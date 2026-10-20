@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 64">
+  <defs><linearGradient id="beer" x1="0" y1="0" x2="0" y2="1"><stop offset="50%" stop-color="#f6f4ec"/><stop offset="50%" stop-color="#e9b44c"/></linearGradient></defs>
+  <path d="M4 4H28V6C23 8 22 10 22 15V29L42 10C45 7 43 6 40 5V4H61V6C56 7 53 9 49 13L34 28C41 29 44 34 48 40L57 54C59 57 61 58 63 58V60H38V58C42 57 42 55 39 51L29 35C27 32 25 31 22 32V49C22 55 23 57 28 58V60H4V58C9 56 10 54 10 49V15C10 10 9 8 4 6Z" fill="url(#beer)" stroke="#59472b" stroke-width="2" stroke-linejoin="round" paint-order="stroke fill"/>
+</svg>
