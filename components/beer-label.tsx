@@ -1,3 +1,4 @@
+import { InitialSectionScroll } from './initial-section-scroll';
 import { SectionHeading } from './section-heading';
 import { RecipeProfile } from './recipe-profile';
 import { ShareBeerButton } from './share-beer-button';
@@ -19,6 +20,7 @@ export function BeerLabel({beer,preview=false,navigation}:{beer:Beer;preview?:bo
  return <article className="label-page" style={{'--accent':accent} as CSSProperties}>
  <style>{`:root { --accent: ${accent}; }`}</style>
  {preview&&<div className="notice">Private Vorschau · <Link href={`/admin/beer/${beer.id}`}>Zurück zur Bearbeitung</Link></div>}
+ <InitialSectionScroll key={beer.id}/>
  {navigation}
  <section className="hero"><div className="hero-copy"><div className="eyebrow">HANDGEBRAUT · SUD {String(beer.public_number??b.number).padStart(2,'0')}</div><p className="style-name">{b.style||'Hausgebraut'}</p><h1>{name}</h1><p className="hero-description">{beer.description||'Ein selbst gebrautes Bier von KrausBräu. Kleine Menge, eigener Charakter.'}</p><div className="hero-foot"><span className="pill">{statusLabel(beer)}</span><span>{metrics.draft?'Noch nicht gebraut':`Gebraut am ${dateLabel(b.date)}`}</span></div><div className="beer-hero-actions"><a className="text-link" href="#bier"><Arrow down/>Das steckt drin</a>{!preview&&beer.public_number!==null&&<ShareBeerButton number={beer.public_number} name={name}/>}{!preview&&<EditBeerLink beerId={beer.id}/>}</div></div>
  <BeerGallery key={beer.id} images={beerImages(beer)} name={name} number={b.number}/></section>

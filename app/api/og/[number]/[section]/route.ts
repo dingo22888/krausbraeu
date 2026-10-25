@@ -15,7 +15,7 @@ export async function GET(_request:Request,{params}:{params:Promise<{number:stri
   h('div',{style:{fontSize:23,color:accent,letterSpacing:3}},`KRAUSBRÄU · SUD ${number}${data.draft?' · REZEPTENTWURF':''}`),
   h('div',{style:{fontSize:48,fontWeight:700,marginTop:12}},truncate(data.name,34)),
   h('div',{style:{fontSize:30,color:accent,marginTop:6,marginBottom:18}},data.label),
-  h('div',{style:{display:'flex',flexDirection:'column',gap:12}},...(data.rows.length?data.rows.slice(0,6):[{label:'Keine Angaben hinterlegt.',value:''}]).map((r,i)=>h('div',{key:i,style:{display:'flex',flexDirection:'column'}},h('div',{style:{fontSize:25}},truncate(r.label,75)),r.value?h('div',{style:{fontSize:21,color:accent}},truncate(r.value,88)):null))),
+  h('div',{style:{display:'flex',flexDirection:'column',gap:data.rows.length>=6?6:12}},...(data.rows.length?data.rows.slice(0,6):[{label:'Keine Angaben hinterlegt.',value:''}]).map((r,i)=>h('div',{key:i,style:{display:'flex',flexDirection:'column'}},h('div',{style:{fontSize:data.rows.length>=6?22:25}},truncate(r.label,75)),r.value?h('div',{style:{fontSize:data.rows.length>=6?19:21,color:accent}},truncate(r.value,88)):null))),
   h('div',{style:{position:'absolute',bottom:22,left:60,fontSize:19,color:'#aaa99b'}},`${data.rows.length>6?`+ ${data.rows.length-6} weitere · `:''}beer.krausonline.de · ${data.label}`)
  ),{width:1200,height:630});
  const image=await sharp(Buffer.from(await png.arrayBuffer())).jpeg({quality:85,mozjpeg:true}).toBuffer();
