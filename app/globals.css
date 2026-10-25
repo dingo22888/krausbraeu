@@ -132,3 +132,10 @@
 .section-jumps a{color:var(--muted)}.section-jumps a:hover,.section-jumps a:focus-visible{color:var(--accent)}
 .metrics-heading{padding-top:28px;padding-bottom:18px;scroll-margin-top:28px}.metrics-heading h2{font-size:30px}
 @media(hover:none){.section-link-icon{opacity:.55}}
+
+.share-section{display:inline-flex;margin-left:8px;vertical-align:middle;font-family:inherit;letter-spacing:normal;text-transform:none}
+.share-section .share-beer-button{min-width:36px;min-height:36px;justify-content:center;padding:6px;border:0;opacity:0}
+.section-heading:hover .share-section .share-beer-button,.section-heading:focus-within .share-section .share-beer-button{opacity:1}
+.share-section .share-feedback{font-size:12px;font-weight:400}.share-section input{font-size:12px;max-width:260px}
+.shared-section p{max-width:800px}.brewing-record{border-top:1px solid var(--line)}.brewing-record h2{font-size:30px;margin:20px 0}.brewing-record .source{font-size:12px;margin-top:24px}
+@media(hover:none){.share-section .share-beer-button{opacity:.65}}

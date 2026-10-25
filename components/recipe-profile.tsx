@@ -33,10 +33,11 @@ function HopTiming({hop,boilMinutes}:{hop:Ingredient;boilMinutes?:number|null}) 
 }
 export function RecipeProfile({beer}:{beer:Beer}) {
   const b=beer.brew;
+  const share=beer.published&&beer.public_number!==null?{number:beer.public_number,name:beer.display_name||b.name}:undefined;
   const total=b.malts.reduce((sum,m)=>sum+(known(m.amount)?m.amount:0),0);
   const yeast=b.yeastDetails?.length?b.yeastDetails:b.yeast.map(name=>({name,amount:null}));
   return <section className="ingredients section recipe-profile" aria-labelledby="rezept">
-    <div className="section-intro"><span className="eyebrow">DAS PRÄGT DIESEN SUD</span><SectionHeading id="rezept">{recipeHeadline(beer)}</SectionHeading>{beer.recipe_note?.trim()&&<p>{beer.recipe_note}</p>}
+    <div className="section-intro"><span className="eyebrow">DAS PRÄGT DIESEN SUD</span><SectionHeading share={share} id="rezept">{recipeHeadline(beer)}</SectionHeading>{beer.recipe_note?.trim()&&<p>{beer.recipe_note}</p>}
       <dl className="recipe-facts">
         {known(b.volume)&&<div><dt>Ausschlag · geplant</dt><dd>{number(b.volume)} <span>l</span></dd></div>}
         {b.malts.length>0&&<div><dt>Gesamtschüttung</dt><dd>{kg(total)} <span>kg</span></dd></div>}
@@ -44,12 +45,12 @@ export function RecipeProfile({beer}:{beer:Beer}) {
       </dl>{!b.date&&!b.bottledDate&&<small className="recipe-context">Planwerte</small>}
     </div>
     <div className="ingredient-list">
-      <div className="ingredient"><IngredientIcon type="malt"/><div><SectionHeading id="schuettung" level={3}>Schüttung</SectionHeading>{b.malts.length===0?<p>Keine Angabe</p>:b.malts.map((m,i)=>{
+      <div className="ingredient"><IngredientIcon type="malt"/><div><SectionHeading share={share} id="schuettung" level={3}>Schüttung</SectionHeading>{b.malts.length===0?<p>Keine Angabe</p>:b.malts.map((m,i)=>{
         const share=known(m.share)?m.share:total>0?m.amount/total*100:null;
         return <div className="malt recipe-malt" key={i}><div className="malt-heading"><span>{m.name}</span><strong>{kg(m.amount)} kg <span>· {share===null?'—':number(share)} %</span></strong></div><MaltGrains ebc={m.ebc}/><div className="bar" aria-hidden="true"><span style={{width:`${Math.max(0,Math.min(100,share??0))}%`}}/></div></div>;
       })}</div></div>
-      <div className="ingredient"><IngredientIcon type="hop"/><div><SectionHeading id="hopfen" level={3}>Hopfen</SectionHeading>{b.hops.length===0?<p>Keine Angabe</p>:<ul className="recipe-additions">{b.hops.map((h,i)=><li key={i}><div><span>{h.name}</span><strong>{number(h.amount)} g</strong></div><small>{[h.firstWort?'Vorderwürze':known(h.minutes)?h.minutes===0?'Zum Kochende':`${number(h.minutes)} min vor Kochende`:null,known(h.alpha)?`${number(h.alpha)} % Alpha`:null].filter(Boolean).join(' · ')}</small><HopTiming hop={h} boilMinutes={b.boilMinutes}/></li>)}</ul>}</div></div>
-      <div className="ingredient"><IngredientIcon type="yeast"/><div><SectionHeading id="hefe" level={3}>Hefe</SectionHeading>{yeast.length===0?<p>Keine Angabe</p>:<ul className="recipe-additions">{yeast.map((y,i)=><li key={i}><div><span>{y.name}</span>{known(y.amount)&&<strong>{number(y.amount)} {y.amount===1?'Packung':'Packungen'}</strong>}</div></li>)}</ul>}</div></div>
+      <div className="ingredient"><IngredientIcon type="hop"/><div><SectionHeading share={share} id="hopfen" level={3}>Hopfen</SectionHeading>{b.hops.length===0?<p>Keine Angabe</p>:<ul className="recipe-additions">{b.hops.map((h,i)=><li key={i}><div><span>{h.name}</span><strong>{number(h.amount)} g</strong></div><small>{[h.firstWort?'Vorderwürze':known(h.minutes)?h.minutes===0?'Zum Kochende':`${number(h.minutes)} min vor Kochende`:null,known(h.alpha)?`${number(h.alpha)} % Alpha`:null].filter(Boolean).join(' · ')}</small><HopTiming hop={h} boilMinutes={b.boilMinutes}/></li>)}</ul>}</div></div>
+      <div className="ingredient"><IngredientIcon type="yeast"/><div><SectionHeading share={share} id="hefe" level={3}>Hefe</SectionHeading>{yeast.length===0?<p>Keine Angabe</p>:<ul className="recipe-additions">{yeast.map((y,i)=><li key={i}><div><span>{y.name}</span>{known(y.amount)&&<strong>{number(y.amount)} {y.amount===1?'Packung':'Packungen'}</strong>}</div></li>)}</ul>}</div></div>
     </div>
   </section>;
 }
